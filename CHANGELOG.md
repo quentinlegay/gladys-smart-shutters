@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-10-17
+
 ### Added
 
 - Smart shutter recommendations per façade, from the position of the sun
@@ -39,3 +41,6 @@ the notes of the version's GitHub Release.
 - Documentation in English, French, German and Spanish.
 - CI (format, lint, tests on Node 22 and 24, Docker build), UI-driven Release
   workflow, multi-arch image build and GitHub Releases.
+
+[Unreleased]: https://github.com/quentinlegay/gladys-smart-shutters/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/quentinlegay/gladys-smart-shutters/releases/tag/v0.0.1

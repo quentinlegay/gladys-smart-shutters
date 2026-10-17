@@ -1,6 +1,6 @@
 {
   "name": "gladys-smart-shutters",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Gladys Assistant external integration: smart shutters driven by the sun, the clouds, the heat and the wind.",
   "type": "module",
