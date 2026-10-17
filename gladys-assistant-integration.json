@@ -1,0 +1,1572 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Smart Shutters",
+  "description": {
+    "en": "Shutters that follow the sun, clouds, heat and wind: scene triggers, actions and widgets.",
+    "fr": "Volets pilotés par le soleil, les nuages, la chaleur et le vent : scènes et widgets.",
+    "de": "Rollläden nach Sonne, Wolken, Hitze und Wind: Szenen-Auslöser, Aktionen und Widgets.",
+    "es": "Persianas según el sol, las nubes, el calor y el viento: escenas y widgets."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/quentinlegay/gladys-smart-shutters:0.0.0",
+  "gladys_version": ">=5.2.0",
+  "cover_image": "https://raw.githubusercontent.com/quentinlegay/gladys-smart-shutters/main/cover.png",
+  "categories": ["climate", "energy", "environment"],
+  "transports": ["cloud"],
+  "location": true,
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer",
+        "de": "Erste Schritte",
+        "es": "Primeros pasos"
+      },
+      "description": {
+        "en": "The integration computes the position of the sun at your house and reads the weather from Open-Meteo (free, no account). Add your façades with the \"Add a façade\" action, add their devices from the Discovery tab, then bind the \"Shutter position recommended\" trigger to your real shutters in a scene.",
+        "fr": "L'intégration calcule la position du soleil chez vous et lit la météo sur Open-Meteo (gratuit, sans compte). Ajoutez vos façades avec l'action « Ajouter une façade », ajoutez leurs appareils depuis l'onglet Découverte, puis reliez le déclencheur « Position de volet recommandée » à vos vrais volets dans une scène.",
+        "de": "Die Integration berechnet den Sonnenstand an Ihrem Haus und liest das Wetter von Open-Meteo (kostenlos, ohne Konto). Fügen Sie Ihre Fassaden mit der Aktion „Fassade hinzufügen“ hinzu, fügen Sie ihre Geräte über den Tab Erkennung hinzu und verknüpfen Sie dann den Auslöser „Rollladenposition empfohlen“ in einer Szene mit Ihren echten Rollläden.",
+        "es": "La integración calcula la posición del sol en tu casa y lee el tiempo de Open-Meteo (gratis, sin cuenta). Añade tus fachadas con la acción «Añadir una fachada», añade sus dispositivos desde la pestaña Descubrimiento y luego vincula el disparador «Posición de persiana recomendada» a tus persianas reales en una escena."
+      },
+      "links": [
+        {
+          "url": "https://open-meteo.com/",
+          "label": {
+            "en": "Open-Meteo",
+            "fr": "Open-Meteo",
+            "de": "Open-Meteo",
+            "es": "Open-Meteo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "house",
+      "type": "select",
+      "source": "houses",
+      "label": {
+        "en": "House",
+        "fr": "Maison",
+        "de": "Haus",
+        "es": "Casa"
+      },
+      "description": {
+        "en": "Its location places the sun. Empty: the first house with coordinates.",
+        "fr": "Sa position place le soleil. Vide : la première maison avec des coordonnées.",
+        "de": "Ihr Standort bestimmt die Sonne. Leer: das erste Haus mit Koordinaten.",
+        "es": "Su ubicación sitúa el sol. Vacío: la primera casa con coordenadas."
+      }
+    },
+    {
+      "key": "refresh_interval",
+      "type": "number",
+      "label": {
+        "en": "Refresh interval (min)",
+        "fr": "Intervalle de rafraîchissement (min)",
+        "de": "Aktualisierungsintervall (Min.)",
+        "es": "Intervalo de actualización (min)"
+      },
+      "description": {
+        "en": "Minutes between two weather reads and decisions (5 minimum).",
+        "fr": "Minutes entre deux lectures météo et décisions (5 minimum).",
+        "de": "Minuten zwischen zwei Wetterabfragen und Entscheidungen (mindestens 5).",
+        "es": "Minutos entre dos lecturas del tiempo y decisiones (5 como mínimo)."
+      },
+      "required": false,
+      "default": 10,
+      "min": 5,
+      "max": 60
+    },
+    {
+      "key": "sun_section",
+      "type": "section",
+      "label": {
+        "en": "Sun and heat",
+        "fr": "Soleil et chaleur",
+        "de": "Sonne und Hitze",
+        "es": "Sol y calor"
+      },
+      "description": {
+        "en": "The shutters move when the sun reaches a façade with enough power under a sky that is not overcast. On a hot day they keep the heat out, on a cold day they let the sun warm the house, in between they only cut the glare.",
+        "fr": "Les volets bougent quand le soleil atteint une façade avec assez de puissance sous un ciel qui n'est pas couvert. Par forte chaleur ils gardent la chaleur dehors, par temps froid ils laissent le soleil chauffer la maison, entre les deux ils coupent seulement l'éblouissement.",
+        "de": "Die Rollläden fahren, wenn die Sonne eine Fassade mit genügend Kraft unter nicht bedecktem Himmel erreicht. An heißen Tagen halten sie die Hitze draußen, an kalten lassen sie die Sonne das Haus wärmen, dazwischen schützen sie nur vor Blendung.",
+        "es": "Las persianas se mueven cuando el sol alcanza una fachada con suficiente potencia bajo un cielo no cubierto. En días calurosos dejan el calor fuera, en días fríos dejan que el sol caliente la casa y, entre ambos, solo cortan el deslumbramiento."
+      }
+    },
+    {
+      "key": "irradiance_threshold",
+      "type": "number",
+      "label": {
+        "en": "Sun power threshold (W/m²)",
+        "fr": "Seuil de puissance solaire (W/m²)",
+        "de": "Schwelle der Sonnenleistung (W/m²)",
+        "es": "Umbral de potencia solar (W/m²)"
+      },
+      "description": {
+        "en": "Power received by the façade from which the sun is a problem.",
+        "fr": "Puissance reçue par la façade à partir de laquelle le soleil gêne.",
+        "de": "Von der Fassade empfangene Leistung, ab der die Sonne stört.",
+        "es": "Potencia recibida por la fachada a partir de la cual el sol molesta."
+      },
+      "required": false,
+      "default": 200,
+      "min": 20,
+      "max": 1200
+    },
+    {
+      "key": "cloud_cover_threshold",
+      "type": "number",
+      "label": {
+        "en": "Overcast from (%)",
+        "fr": "Ciel couvert à partir de (%)",
+        "de": "Bedeckt ab (%)",
+        "es": "Cubierto a partir de (%)"
+      },
+      "description": {
+        "en": "Cloud cover from which the sun is considered hidden.",
+        "fr": "Couverture nuageuse à partir de laquelle le soleil est considéré caché.",
+        "de": "Bewölkung, ab der die Sonne als verdeckt gilt.",
+        "es": "Nubosidad a partir de la cual se considera el sol oculto."
+      },
+      "required": false,
+      "default": 80,
+      "min": 10,
+      "max": 100
+    },
+    {
+      "key": "heat_threshold",
+      "type": "number",
+      "label": {
+        "en": "Heat threshold (°C)",
+        "fr": "Seuil de chaleur (°C)",
+        "de": "Hitzeschwelle (°C)",
+        "es": "Umbral de calor (°C)"
+      },
+      "description": {
+        "en": "Outdoor temperature from which the shutters keep the heat out.",
+        "fr": "Température extérieure à partir de laquelle les volets gardent la chaleur dehors.",
+        "de": "Außentemperatur, ab der die Rollläden die Hitze draußen halten.",
+        "es": "Temperatura exterior a partir de la cual las persianas dejan el calor fuera."
+      },
+      "required": false,
+      "default": 25,
+      "min": 10,
+      "max": 45
+    },
+    {
+      "key": "cold_threshold",
+      "type": "number",
+      "label": {
+        "en": "Cold threshold (°C)",
+        "fr": "Seuil de froid (°C)",
+        "de": "Kälteschwelle (°C)",
+        "es": "Umbral de frío (°C)"
+      },
+      "description": {
+        "en": "Outdoor temperature below which the sun is welcome (free heating).",
+        "fr": "Température extérieure sous laquelle le soleil est bienvenu (chauffage gratuit).",
+        "de": "Außentemperatur, unter der die Sonne willkommen ist (kostenlose Heizung).",
+        "es": "Temperatura exterior por debajo de la cual el sol es bienvenido (calefacción gratis)."
+      },
+      "required": false,
+      "default": 15,
+      "min": -20,
+      "max": 30
+    },
+    {
+      "key": "anticipate_heat",
+      "type": "boolean",
+      "label": {
+        "en": "Anticipate hot days",
+        "fr": "Anticiper les journées chaudes",
+        "de": "Heiße Tage vorwegnehmen",
+        "es": "Anticipar los días calurosos"
+      },
+      "description": {
+        "en": "When today's forecast reaches the heat threshold, protect from the morning, before the house warms up.",
+        "fr": "Quand la prévision du jour atteint le seuil de chaleur, protéger dès le matin, avant que la maison chauffe.",
+        "de": "Wenn die heutige Vorhersage die Hitzeschwelle erreicht, schon morgens schützen, bevor sich das Haus aufheizt.",
+        "es": "Cuando la previsión del día alcanza el umbral de calor, proteger desde la mañana, antes de que la casa se caliente."
+      },
+      "default": true
+    },
+    {
+      "key": "glare_protection",
+      "type": "boolean",
+      "label": {
+        "en": "Glare protection",
+        "fr": "Anti-éblouissement",
+        "de": "Blendschutz",
+        "es": "Antideslumbramiento"
+      },
+      "description": {
+        "en": "Between the cold and heat thresholds, lower the shutters to the glare position in direct sun.",
+        "fr": "Entre les seuils de froid et de chaleur, baisser les volets à la position anti-éblouissement en plein soleil.",
+        "de": "Zwischen Kälte- und Hitzeschwelle die Rollläden bei direkter Sonne auf die Blendschutz-Position fahren.",
+        "es": "Entre los umbrales de frío y calor, bajar las persianas a la posición antideslumbramiento a pleno sol."
+      },
+      "default": true
+    },
+    {
+      "key": "night_section",
+      "type": "section",
+      "label": {
+        "en": "Night and wind",
+        "fr": "Nuit et vent",
+        "de": "Nacht und Wind",
+        "es": "Noche y viento"
+      },
+      "description": {
+        "en": "Night and wind come first, and apply at once. Rolling shutters and exterior blinds can be damaged by strong gusts: the wind position protects them (100 = fully raised).",
+        "fr": "La nuit et le vent passent en premier, et s'appliquent aussitôt. Les volets roulants et les brise-soleil orientables peuvent être abîmés par de fortes rafales : la position vent les protège (100 = complètement relevés).",
+        "de": "Nacht und Wind haben Vorrang und gelten sofort. Rollläden und Raffstores können durch starke Böen beschädigt werden: die Wind-Position schützt sie (100 = ganz hochgefahren).",
+        "es": "La noche y el viento tienen prioridad y se aplican al instante. Las persianas enrollables y las lamas exteriores pueden dañarse con ráfagas fuertes: la posición viento las protege (100 = totalmente subidas)."
+      }
+    },
+    {
+      "key": "night_mode",
+      "type": "boolean",
+      "label": {
+        "en": "Close at night",
+        "fr": "Fermer la nuit",
+        "de": "Nachts schließen",
+        "es": "Cerrar de noche"
+      },
+      "default": true
+    },
+    {
+      "key": "night_elevation",
+      "type": "number",
+      "label": {
+        "en": "Night from sun height (°)",
+        "fr": "Nuit à partir de la hauteur (°)",
+        "de": "Nacht ab Sonnenhöhe (°)",
+        "es": "Noche desde la altura (°)"
+      },
+      "description": {
+        "en": "Sun height under the horizon at which night starts (-4 = a little after sunset).",
+        "fr": "Hauteur du soleil sous l'horizon où commence la nuit (-4 = un peu après le coucher).",
+        "de": "Sonnenhöhe unter dem Horizont, ab der die Nacht beginnt (-4 = kurz nach Sonnenuntergang).",
+        "es": "Altura del sol bajo el horizonte en la que empieza la noche (-4 = poco después de la puesta)."
+      },
+      "required": false,
+      "default": -4,
+      "min": -12,
+      "max": 5
+    },
+    {
+      "key": "night_position",
+      "type": "number",
+      "label": {
+        "en": "Night position (%)",
+        "fr": "Position de nuit (%)",
+        "de": "Nacht-Position (%)",
+        "es": "Posición de noche (%)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "wind_threshold",
+      "type": "number",
+      "label": {
+        "en": "Wind gusts threshold (km/h)",
+        "fr": "Seuil de rafales (km/h)",
+        "de": "Böenschwelle (km/h)",
+        "es": "Umbral de ráfagas (km/h)"
+      },
+      "description": {
+        "en": "Gusts from which the shutters move to the wind position (0 = disabled).",
+        "fr": "Rafales à partir desquelles les volets passent en position vent (0 = désactivé).",
+        "de": "Böen, ab denen die Rollläden in die Wind-Position fahren (0 = deaktiviert).",
+        "es": "Ráfagas a partir de las cuales las persianas pasan a la posición viento (0 = desactivado)."
+      },
+      "required": false,
+      "default": 50,
+      "min": 0,
+      "max": 150
+    },
+    {
+      "key": "wind_position",
+      "type": "number",
+      "label": {
+        "en": "Wind position (%)",
+        "fr": "Position vent (%)",
+        "de": "Wind-Position (%)",
+        "es": "Posición viento (%)"
+      },
+      "required": false,
+      "default": 100,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "stability_section",
+      "type": "section",
+      "label": {
+        "en": "Stability",
+        "fr": "Stabilité",
+        "de": "Stabilität",
+        "es": "Estabilidad"
+      },
+      "description": {
+        "en": "A passing cloud must not make the shutters dance: a new position is sent at most every few minutes, and only when it moves them enough.",
+        "fr": "Un nuage qui passe ne doit pas faire danser les volets : une nouvelle position est envoyée au plus toutes les quelques minutes, et seulement si elle les déplace assez.",
+        "de": "Eine vorbeiziehende Wolke darf die Rollläden nicht tanzen lassen: eine neue Position wird höchstens alle paar Minuten gesendet, und nur wenn sie sie genug bewegt.",
+        "es": "Una nube pasajera no debe hacer bailar las persianas: se envía una nueva posición como mucho cada pocos minutos, y solo si las mueve lo suficiente."
+      }
+    },
+    {
+      "key": "min_change_interval",
+      "type": "number",
+      "label": {
+        "en": "Minimum delay between moves (min)",
+        "fr": "Délai minimal entre deux mouvements (min)",
+        "de": "Mindestabstand zwischen Fahrten (Min.)",
+        "es": "Retraso mínimo entre movimientos (min)"
+      },
+      "required": false,
+      "default": 20,
+      "min": 0,
+      "max": 240
+    },
+    {
+      "key": "min_position_delta",
+      "type": "number",
+      "label": {
+        "en": "Minimum move (%)",
+        "fr": "Mouvement minimal (%)",
+        "de": "Minimale Bewegung (%)",
+        "es": "Movimiento mínimo (%)"
+      },
+      "required": false,
+      "default": 10,
+      "min": 0,
+      "max": 50
+    }
+  ],
+  "actions": [
+    {
+      "key": "add_facade",
+      "label": {
+        "en": "Add a façade",
+        "fr": "Ajouter une façade",
+        "de": "Fassade hinzufügen",
+        "es": "Añadir una fachada"
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Name",
+            "fr": "Nom",
+            "de": "Name",
+            "es": "Nombre"
+          },
+          "description": {
+            "en": "Windows facing the same way, e.g. the living room bay windows.",
+            "fr": "Fenêtres orientées pareil, par ex. les baies du salon.",
+            "de": "Gleich ausgerichtete Fenster, z. B. die Wohnzimmerfenster.",
+            "es": "Ventanas con la misma orientación, p. ej. los ventanales del salón."
+          },
+          "placeholder": {
+            "en": "e.g. Living room south",
+            "fr": "ex. Salon sud",
+            "de": "z. B. Wohnzimmer Süd",
+            "es": "p. ej. Salón sur"
+          },
+          "required": true
+        },
+        {
+          "key": "orientation",
+          "type": "select",
+          "label": {
+            "en": "Orientation",
+            "fr": "Orientation",
+            "de": "Ausrichtung",
+            "es": "Orientación"
+          },
+          "description": {
+            "en": "Where the windows look to.",
+            "fr": "Vers où regardent les fenêtres.",
+            "de": "Wohin die Fenster zeigen.",
+            "es": "Hacia dónde miran las ventanas."
+          },
+          "required": true,
+          "default": "south",
+          "options": [
+            {
+              "value": "north",
+              "label": {
+                "en": "North",
+                "fr": "Nord",
+                "de": "Norden",
+                "es": "Norte"
+              }
+            },
+            {
+              "value": "north_east",
+              "label": {
+                "en": "North-east",
+                "fr": "Nord-est",
+                "de": "Nordosten",
+                "es": "Noreste"
+              }
+            },
+            {
+              "value": "east",
+              "label": {
+                "en": "East",
+                "fr": "Est",
+                "de": "Osten",
+                "es": "Este"
+              }
+            },
+            {
+              "value": "south_east",
+              "label": {
+                "en": "South-east",
+                "fr": "Sud-est",
+                "de": "Südosten",
+                "es": "Sureste"
+              }
+            },
+            {
+              "value": "south",
+              "label": {
+                "en": "South",
+                "fr": "Sud",
+                "de": "Süden",
+                "es": "Sur"
+              }
+            },
+            {
+              "value": "south_west",
+              "label": {
+                "en": "South-west",
+                "fr": "Sud-ouest",
+                "de": "Südwesten",
+                "es": "Suroeste"
+              }
+            },
+            {
+              "value": "west",
+              "label": {
+                "en": "West",
+                "fr": "Ouest",
+                "de": "Westen",
+                "es": "Oeste"
+              }
+            },
+            {
+              "value": "north_west",
+              "label": {
+                "en": "North-west",
+                "fr": "Nord-ouest",
+                "de": "Nordwesten",
+                "es": "Noroeste"
+              }
+            }
+          ]
+        },
+        {
+          "key": "azimuth",
+          "type": "number",
+          "label": {
+            "en": "Exact azimuth (°)",
+            "fr": "Azimut exact (°)",
+            "de": "Genauer Azimut (°)",
+            "es": "Acimut exacto (°)"
+          },
+          "description": {
+            "en": "Optional, wins over the orientation: 0 = north, 90 = east, 180 = south, 270 = west.",
+            "fr": "Facultatif, prime sur l'orientation : 0 = nord, 90 = est, 180 = sud, 270 = ouest.",
+            "de": "Optional, hat Vorrang vor der Ausrichtung: 0 = Nord, 90 = Ost, 180 = Süd, 270 = West.",
+            "es": "Opcional, prevalece sobre la orientación: 0 = norte, 90 = este, 180 = sur, 270 = oeste."
+          },
+          "min": 0,
+          "max": 359,
+          "placeholder": {
+            "en": "e.g. 195",
+            "fr": "ex. 195",
+            "de": "z. B. 195",
+            "es": "p. ej. 195"
+          }
+        },
+        {
+          "key": "opening_angle",
+          "type": "number",
+          "label": {
+            "en": "Opening angle (°)",
+            "fr": "Angle d'ouverture (°)",
+            "de": "Öffnungswinkel (°)",
+            "es": "Ángulo de apertura (°)"
+          },
+          "description": {
+            "en": "How far to each side of the façade the sun still enters (90 = the whole half sky).",
+            "fr": "Jusqu'où, de chaque côté de la façade, le soleil entre encore (90 = tout le demi-ciel).",
+            "de": "Wie weit seitlich der Fassade die Sonne noch hereinscheint (90 = der ganze halbe Himmel).",
+            "es": "Hasta dónde, a cada lado de la fachada, entra aún el sol (90 = todo el medio cielo)."
+          },
+          "default": 80,
+          "min": 10,
+          "max": 90
+        },
+        {
+          "key": "min_elevation",
+          "type": "number",
+          "label": {
+            "en": "Minimum sun height (°)",
+            "fr": "Hauteur minimale du soleil (°)",
+            "de": "Minimale Sonnenhöhe (°)",
+            "es": "Altura mínima del sol (°)"
+          },
+          "description": {
+            "en": "Below it, buildings, trees or hills hide the sun.",
+            "fr": "En dessous, bâtiments, arbres ou relief cachent le soleil.",
+            "de": "Darunter verdecken Gebäude, Bäume oder Hügel die Sonne.",
+            "es": "Por debajo, edificios, árboles o colinas tapan el sol."
+          },
+          "default": 5,
+          "min": 0,
+          "max": 60
+        },
+        {
+          "key": "max_elevation",
+          "type": "number",
+          "label": {
+            "en": "Maximum sun height (°)",
+            "fr": "Hauteur maximale du soleil (°)",
+            "de": "Maximale Sonnenhöhe (°)",
+            "es": "Altura máxima del sol (°)"
+          },
+          "description": {
+            "en": "Above it, a balcony or an overhang shades the windows (90 = none).",
+            "fr": "Au-dessus, un balcon ou un avant-toit ombrage les fenêtres (90 = aucun).",
+            "de": "Darüber beschattet ein Balkon oder Vordach die Fenster (90 = keiner).",
+            "es": "Por encima, un balcón o alero da sombra a las ventanas (90 = ninguno)."
+          },
+          "default": 90,
+          "min": 10,
+          "max": 90
+        },
+        {
+          "key": "shade_position",
+          "type": "number",
+          "label": {
+            "en": "Glare position (%)",
+            "fr": "Position anti-éblouissement (%)",
+            "de": "Blendschutz-Position (%)",
+            "es": "Posición antideslumbramiento (%)"
+          },
+          "description": {
+            "en": "Position against the glare on a mild day (0 = closed, 100 = open).",
+            "fr": "Position contre l'éblouissement par temps doux (0 = fermé, 100 = ouvert).",
+            "de": "Position gegen Blendung an milden Tagen (0 = geschlossen, 100 = offen).",
+            "es": "Posición contra el deslumbramiento en días templados (0 = cerrada, 100 = abierta)."
+          },
+          "default": 30,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "key": "heat_position",
+          "type": "number",
+          "label": {
+            "en": "Heat position (%)",
+            "fr": "Position chaleur (%)",
+            "de": "Hitze-Position (%)",
+            "es": "Posición calor (%)"
+          },
+          "description": {
+            "en": "Position that keeps the heat out on a hot day.",
+            "fr": "Position qui garde la chaleur dehors par forte chaleur.",
+            "de": "Position, die an heißen Tagen die Hitze draußen hält.",
+            "es": "Posición que deja el calor fuera en días calurosos."
+          },
+          "default": 10,
+          "min": 0,
+          "max": 100
+        }
+      ]
+    },
+    {
+      "key": "edit_facade",
+      "label": {
+        "en": "Edit a façade",
+        "fr": "Modifier une façade",
+        "de": "Fassade bearbeiten",
+        "es": "Editar una fachada"
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "required": true
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Name",
+            "fr": "Nom",
+            "de": "Name",
+            "es": "Nombre"
+          },
+          "description": {
+            "en": "Windows facing the same way, e.g. the living room bay windows. Leave blank to keep the current value.",
+            "fr": "Fenêtres orientées pareil, par ex. les baies du salon. Laissez vide pour garder la valeur actuelle.",
+            "de": "Gleich ausgerichtete Fenster, z. B. die Wohnzimmerfenster. Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Ventanas con la misma orientación, p. ej. los ventanales del salón. Déjalo vacío para mantener el valor actual."
+          },
+          "placeholder": {
+            "en": "e.g. Living room south",
+            "fr": "ex. Salon sud",
+            "de": "z. B. Wohnzimmer Süd",
+            "es": "p. ej. Salón sur"
+          }
+        },
+        {
+          "key": "orientation",
+          "type": "select",
+          "label": {
+            "en": "Orientation",
+            "fr": "Orientation",
+            "de": "Ausrichtung",
+            "es": "Orientación"
+          },
+          "description": {
+            "en": "Where the windows look to. Leave blank to keep the current value.",
+            "fr": "Vers où regardent les fenêtres. Laissez vide pour garder la valeur actuelle.",
+            "de": "Wohin die Fenster zeigen. Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Hacia dónde miran las ventanas. Déjalo vacío para mantener el valor actual."
+          },
+          "options": [
+            {
+              "value": "north",
+              "label": {
+                "en": "North",
+                "fr": "Nord",
+                "de": "Norden",
+                "es": "Norte"
+              }
+            },
+            {
+              "value": "north_east",
+              "label": {
+                "en": "North-east",
+                "fr": "Nord-est",
+                "de": "Nordosten",
+                "es": "Noreste"
+              }
+            },
+            {
+              "value": "east",
+              "label": {
+                "en": "East",
+                "fr": "Est",
+                "de": "Osten",
+                "es": "Este"
+              }
+            },
+            {
+              "value": "south_east",
+              "label": {
+                "en": "South-east",
+                "fr": "Sud-est",
+                "de": "Südosten",
+                "es": "Sureste"
+              }
+            },
+            {
+              "value": "south",
+              "label": {
+                "en": "South",
+                "fr": "Sud",
+                "de": "Süden",
+                "es": "Sur"
+              }
+            },
+            {
+              "value": "south_west",
+              "label": {
+                "en": "South-west",
+                "fr": "Sud-ouest",
+                "de": "Südwesten",
+                "es": "Suroeste"
+              }
+            },
+            {
+              "value": "west",
+              "label": {
+                "en": "West",
+                "fr": "Ouest",
+                "de": "Westen",
+                "es": "Oeste"
+              }
+            },
+            {
+              "value": "north_west",
+              "label": {
+                "en": "North-west",
+                "fr": "Nord-ouest",
+                "de": "Nordwesten",
+                "es": "Noroeste"
+              }
+            }
+          ]
+        },
+        {
+          "key": "azimuth",
+          "type": "number",
+          "label": {
+            "en": "Exact azimuth (°)",
+            "fr": "Azimut exact (°)",
+            "de": "Genauer Azimut (°)",
+            "es": "Acimut exacto (°)"
+          },
+          "description": {
+            "en": "Optional, wins over the orientation: 0 = north, 90 = east, 180 = south, 270 = west. Leave blank to keep the current value.",
+            "fr": "Facultatif, prime sur l'orientation : 0 = nord, 90 = est, 180 = sud, 270 = ouest. Laissez vide pour garder la valeur actuelle.",
+            "de": "Optional, hat Vorrang vor der Ausrichtung: 0 = Nord, 90 = Ost, 180 = Süd, 270 = West. Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Opcional, prevalece sobre la orientación: 0 = norte, 90 = este, 180 = sur, 270 = oeste. Déjalo vacío para mantener el valor actual."
+          },
+          "min": 0,
+          "max": 359,
+          "placeholder": {
+            "en": "e.g. 195",
+            "fr": "ex. 195",
+            "de": "z. B. 195",
+            "es": "p. ej. 195"
+          }
+        },
+        {
+          "key": "opening_angle",
+          "type": "number",
+          "label": {
+            "en": "Opening angle (°)",
+            "fr": "Angle d'ouverture (°)",
+            "de": "Öffnungswinkel (°)",
+            "es": "Ángulo de apertura (°)"
+          },
+          "description": {
+            "en": "How far to each side of the façade the sun still enters (90 = the whole half sky). Leave blank to keep the current value.",
+            "fr": "Jusqu'où, de chaque côté de la façade, le soleil entre encore (90 = tout le demi-ciel). Laissez vide pour garder la valeur actuelle.",
+            "de": "Wie weit seitlich der Fassade die Sonne noch hereinscheint (90 = der ganze halbe Himmel). Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Hasta dónde, a cada lado de la fachada, entra aún el sol (90 = todo el medio cielo). Déjalo vacío para mantener el valor actual."
+          },
+          "min": 10,
+          "max": 90
+        },
+        {
+          "key": "min_elevation",
+          "type": "number",
+          "label": {
+            "en": "Minimum sun height (°)",
+            "fr": "Hauteur minimale du soleil (°)",
+            "de": "Minimale Sonnenhöhe (°)",
+            "es": "Altura mínima del sol (°)"
+          },
+          "description": {
+            "en": "Below it, buildings, trees or hills hide the sun. Leave blank to keep the current value.",
+            "fr": "En dessous, bâtiments, arbres ou relief cachent le soleil. Laissez vide pour garder la valeur actuelle.",
+            "de": "Darunter verdecken Gebäude, Bäume oder Hügel die Sonne. Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Por debajo, edificios, árboles o colinas tapan el sol. Déjalo vacío para mantener el valor actual."
+          },
+          "min": 0,
+          "max": 60
+        },
+        {
+          "key": "max_elevation",
+          "type": "number",
+          "label": {
+            "en": "Maximum sun height (°)",
+            "fr": "Hauteur maximale du soleil (°)",
+            "de": "Maximale Sonnenhöhe (°)",
+            "es": "Altura máxima del sol (°)"
+          },
+          "description": {
+            "en": "Above it, a balcony or an overhang shades the windows (90 = none). Leave blank to keep the current value.",
+            "fr": "Au-dessus, un balcon ou un avant-toit ombrage les fenêtres (90 = aucun). Laissez vide pour garder la valeur actuelle.",
+            "de": "Darüber beschattet ein Balkon oder Vordach die Fenster (90 = keiner). Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Por encima, un balcón o alero da sombra a las ventanas (90 = ninguno). Déjalo vacío para mantener el valor actual."
+          },
+          "min": 10,
+          "max": 90
+        },
+        {
+          "key": "shade_position",
+          "type": "number",
+          "label": {
+            "en": "Glare position (%)",
+            "fr": "Position anti-éblouissement (%)",
+            "de": "Blendschutz-Position (%)",
+            "es": "Posición antideslumbramiento (%)"
+          },
+          "description": {
+            "en": "Position against the glare on a mild day (0 = closed, 100 = open). Leave blank to keep the current value.",
+            "fr": "Position contre l'éblouissement par temps doux (0 = fermé, 100 = ouvert). Laissez vide pour garder la valeur actuelle.",
+            "de": "Position gegen Blendung an milden Tagen (0 = geschlossen, 100 = offen). Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Posición contra el deslumbramiento en días templados (0 = cerrada, 100 = abierta). Déjalo vacío para mantener el valor actual."
+          },
+          "min": 0,
+          "max": 100
+        },
+        {
+          "key": "heat_position",
+          "type": "number",
+          "label": {
+            "en": "Heat position (%)",
+            "fr": "Position chaleur (%)",
+            "de": "Hitze-Position (%)",
+            "es": "Posición calor (%)"
+          },
+          "description": {
+            "en": "Position that keeps the heat out on a hot day. Leave blank to keep the current value.",
+            "fr": "Position qui garde la chaleur dehors par forte chaleur. Laissez vide pour garder la valeur actuelle.",
+            "de": "Position, die an heißen Tagen die Hitze draußen hält. Leer lassen, um den aktuellen Wert zu behalten.",
+            "es": "Posición que deja el calor fuera en días calurosos. Déjalo vacío para mantener el valor actual."
+          },
+          "min": 0,
+          "max": 100
+        }
+      ]
+    },
+    {
+      "key": "remove_facade",
+      "label": {
+        "en": "Remove a façade",
+        "fr": "Supprimer une façade",
+        "de": "Fassade entfernen",
+        "es": "Eliminar una fachada"
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "refresh_now",
+      "label": {
+        "en": "Refresh now",
+        "fr": "Rafraîchir maintenant",
+        "de": "Jetzt aktualisieren",
+        "es": "Actualizar ahora"
+      },
+      "timeout_seconds": 30
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "position_changed",
+      "label": {
+        "en": "Shutter position recommended",
+        "fr": "Position de volet recommandée",
+        "de": "Rollladenposition empfohlen",
+        "es": "Posición de persiana recomendada"
+      },
+      "description": {
+        "en": "The automation asks a façade's shutters to move: apply {{triggerEvent.data.position}} to your shutters.",
+        "fr": "L'automatisme demande aux volets d'une façade de bouger : appliquez {{triggerEvent.data.position}} à vos volets.",
+        "de": "Die Automatik verlangt, dass die Rollläden einer Fassade fahren: wenden Sie {{triggerEvent.data.position}} auf Ihre Rollläden an.",
+        "es": "La automatización pide mover las persianas de una fachada: aplica {{triggerEvent.data.position}} a tus persianas."
+      },
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          }
+        },
+        {
+          "key": "reason",
+          "type": "multi_select",
+          "label": {
+            "en": "Reason",
+            "fr": "Raison",
+            "de": "Grund",
+            "es": "Motivo"
+          },
+          "options": [
+            {
+              "value": "wind",
+              "label": {
+                "en": "Wind protection",
+                "fr": "Protection vent",
+                "de": "Windschutz",
+                "es": "Protección viento"
+              }
+            },
+            {
+              "value": "night",
+              "label": {
+                "en": "Night",
+                "fr": "Nuit",
+                "de": "Nacht",
+                "es": "Noche"
+              }
+            },
+            {
+              "value": "heat",
+              "label": {
+                "en": "Heat protection",
+                "fr": "Protection chaleur",
+                "de": "Hitzeschutz",
+                "es": "Protección calor"
+              }
+            },
+            {
+              "value": "glare",
+              "label": {
+                "en": "Glare protection",
+                "fr": "Anti-éblouissement",
+                "de": "Blendschutz",
+                "es": "Antideslumbramiento"
+              }
+            },
+            {
+              "value": "solar_gain",
+              "label": {
+                "en": "Sun let in",
+                "fr": "Soleil bienvenu",
+                "de": "Sonne erwünscht",
+                "es": "Sol bienvenido"
+              }
+            },
+            {
+              "value": "cloudy",
+              "label": {
+                "en": "Cloudy",
+                "fr": "Nuageux",
+                "de": "Bewölkt",
+                "es": "Nublado"
+              }
+            },
+            {
+              "value": "no_sun",
+              "label": {
+                "en": "No sun on the façade",
+                "fr": "Pas de soleil sur la façade",
+                "de": "Keine Sonne auf der Fassade",
+                "es": "Sin sol en la fachada"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "position",
+          "type": "number",
+          "label": {
+            "en": "Position (%)",
+            "fr": "Position (%)",
+            "de": "Position (%)",
+            "es": "Posición (%)"
+          }
+        },
+        {
+          "key": "previous_position",
+          "type": "number",
+          "label": {
+            "en": "Previous position (%)",
+            "fr": "Position précédente (%)",
+            "de": "Vorherige Position (%)",
+            "es": "Posición anterior (%)"
+          }
+        },
+        {
+          "key": "reason",
+          "type": "string",
+          "label": {
+            "en": "Reason",
+            "fr": "Raison",
+            "de": "Grund",
+            "es": "Motivo"
+          }
+        },
+        {
+          "key": "facade_name",
+          "type": "string",
+          "label": {
+            "en": "Façade name",
+            "fr": "Nom de la façade",
+            "de": "Name der Fassade",
+            "es": "Nombre de la fachada"
+          }
+        },
+        {
+          "key": "irradiance",
+          "type": "number",
+          "label": {
+            "en": "Power on the façade (W/m²)",
+            "fr": "Puissance sur la façade (W/m²)",
+            "de": "Leistung auf der Fassade (W/m²)",
+            "es": "Potencia en la fachada (W/m²)"
+          }
+        },
+        {
+          "key": "sun_elevation",
+          "type": "number",
+          "label": {
+            "en": "Sun height (°)",
+            "fr": "Hauteur du soleil (°)",
+            "de": "Sonnenhöhe (°)",
+            "es": "Altura del sol (°)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "sun_on_facade",
+      "label": {
+        "en": "Sun on a façade",
+        "fr": "Soleil sur une façade",
+        "de": "Sonne auf einer Fassade",
+        "es": "Sol en una fachada"
+      },
+      "description": {
+        "en": "The sun starts or stops reaching a façade.",
+        "fr": "Le soleil commence ou cesse d'atteindre une façade.",
+        "de": "Die Sonne beginnt oder hört auf, eine Fassade zu erreichen.",
+        "es": "El sol empieza o deja de alcanzar una fachada."
+      },
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          }
+        },
+        {
+          "key": "phase",
+          "type": "multi_select",
+          "label": {
+            "en": "When",
+            "fr": "Quand",
+            "de": "Wann",
+            "es": "Cuándo"
+          },
+          "options": [
+            {
+              "value": "arrived",
+              "label": {
+                "en": "The sun arrives",
+                "fr": "Le soleil arrive",
+                "de": "Die Sonne kommt",
+                "es": "Llega el sol"
+              }
+            },
+            {
+              "value": "left",
+              "label": {
+                "en": "The sun leaves",
+                "fr": "Le soleil part",
+                "de": "Die Sonne geht",
+                "es": "Se va el sol"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "phase",
+          "type": "string",
+          "label": {
+            "en": "Arrived or left",
+            "fr": "Arrivé ou parti",
+            "de": "Gekommen oder gegangen",
+            "es": "Llegado o ido"
+          }
+        },
+        {
+          "key": "facade_name",
+          "type": "string",
+          "label": {
+            "en": "Façade name",
+            "fr": "Nom de la façade",
+            "de": "Name der Fassade",
+            "es": "Nombre de la fachada"
+          }
+        },
+        {
+          "key": "sun_elevation",
+          "type": "number",
+          "label": {
+            "en": "Sun height (°)",
+            "fr": "Hauteur du soleil (°)",
+            "de": "Sonnenhöhe (°)",
+            "es": "Altura del sol (°)"
+          }
+        },
+        {
+          "key": "sun_azimuth",
+          "type": "number",
+          "label": {
+            "en": "Sun azimuth (°)",
+            "fr": "Azimut du soleil (°)",
+            "de": "Sonnenazimut (°)",
+            "es": "Acimut del sol (°)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "wind_protection",
+      "label": {
+        "en": "Wind protection",
+        "fr": "Protection contre le vent",
+        "de": "Windschutz",
+        "es": "Protección contra el viento"
+      },
+      "description": {
+        "en": "Gusts go over the threshold, or back under it.",
+        "fr": "Les rafales dépassent le seuil, ou repassent en dessous.",
+        "de": "Die Böen überschreiten die Schwelle oder fallen wieder darunter.",
+        "es": "Las ráfagas superan el umbral, o vuelven a bajar."
+      },
+      "fields": [
+        {
+          "key": "phase",
+          "type": "multi_select",
+          "label": {
+            "en": "When",
+            "fr": "Quand",
+            "de": "Wann",
+            "es": "Cuándo"
+          },
+          "options": [
+            {
+              "value": "started",
+              "label": {
+                "en": "Protection starts",
+                "fr": "La protection démarre",
+                "de": "Schutz beginnt",
+                "es": "Empieza la protección"
+              }
+            },
+            {
+              "value": "ended",
+              "label": {
+                "en": "Protection ends",
+                "fr": "La protection s'arrête",
+                "de": "Schutz endet",
+                "es": "Termina la protección"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "phase",
+          "type": "string",
+          "label": {
+            "en": "Started or ended",
+            "fr": "Démarrée ou terminée",
+            "de": "Begonnen oder beendet",
+            "es": "Iniciada o terminada"
+          }
+        },
+        {
+          "key": "wind_gusts",
+          "type": "number",
+          "label": {
+            "en": "Gusts (km/h)",
+            "fr": "Rafales (km/h)",
+            "de": "Böen (km/h)",
+            "es": "Ráfagas (km/h)"
+          }
+        },
+        {
+          "key": "wind_speed",
+          "type": "number",
+          "label": {
+            "en": "Wind speed (km/h)",
+            "fr": "Vitesse du vent (km/h)",
+            "de": "Windgeschwindigkeit (km/h)",
+            "es": "Velocidad del viento (km/h)"
+          }
+        },
+        {
+          "key": "position",
+          "type": "number",
+          "label": {
+            "en": "Wind position (%)",
+            "fr": "Position vent (%)",
+            "de": "Wind-Position (%)",
+            "es": "Posición viento (%)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "heat_day",
+      "label": {
+        "en": "Hot day forecast",
+        "fr": "Journée chaude prévue",
+        "de": "Heißer Tag vorhergesagt",
+        "es": "Día caluroso previsto"
+      },
+      "description": {
+        "en": "Today's forecast reaches the heat threshold (once a day, after sunrise).",
+        "fr": "La prévision du jour atteint le seuil de chaleur (une fois par jour, après le lever du soleil).",
+        "de": "Die heutige Vorhersage erreicht die Hitzeschwelle (einmal täglich, nach Sonnenaufgang).",
+        "es": "La previsión del día alcanza el umbral de calor (una vez al día, tras la salida del sol)."
+      },
+      "variables": [
+        {
+          "key": "temperature_max",
+          "type": "number",
+          "label": {
+            "en": "Maximum today (°C)",
+            "fr": "Maximum aujourd'hui (°C)",
+            "de": "Höchstwert heute (°C)",
+            "es": "Máxima de hoy (°C)"
+          }
+        },
+        {
+          "key": "temperature",
+          "type": "number",
+          "label": {
+            "en": "Temperature now (°C)",
+            "fr": "Température actuelle (°C)",
+            "de": "Aktuelle Temperatur (°C)",
+            "es": "Temperatura actual (°C)"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "get_recommendation",
+      "label": {
+        "en": "Get the recommended position",
+        "fr": "Obtenir la position recommandée",
+        "de": "Empfohlene Position abrufen",
+        "es": "Obtener la posición recomendada"
+      },
+      "description": {
+        "en": "What the automation recommends for a façade right now.",
+        "fr": "Ce que l'automatisme recommande pour une façade en ce moment.",
+        "de": "Was die Automatik gerade für eine Fassade empfiehlt.",
+        "es": "Lo que la automatización recomienda ahora para una fachada."
+      },
+      "timeout_seconds": 10,
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "position",
+          "type": "number",
+          "label": {
+            "en": "Position (%)",
+            "fr": "Position (%)",
+            "de": "Position (%)",
+            "es": "Posición (%)"
+          }
+        },
+        {
+          "key": "reason",
+          "type": "string",
+          "label": {
+            "en": "Reason",
+            "fr": "Raison",
+            "de": "Grund",
+            "es": "Motivo"
+          }
+        },
+        {
+          "key": "reason_label",
+          "type": "string",
+          "label": {
+            "en": "Reason (text)",
+            "fr": "Raison (texte)",
+            "de": "Grund (Text)",
+            "es": "Motivo (texto)"
+          }
+        },
+        {
+          "key": "sun_on_facade",
+          "type": "boolean",
+          "label": {
+            "en": "Sun on the façade",
+            "fr": "Soleil sur la façade",
+            "de": "Sonne auf der Fassade",
+            "es": "Sol en la fachada"
+          }
+        },
+        {
+          "key": "irradiance",
+          "type": "number",
+          "label": {
+            "en": "Power on the façade (W/m²)",
+            "fr": "Puissance sur la façade (W/m²)",
+            "de": "Leistung auf der Fassade (W/m²)",
+            "es": "Potencia en la fachada (W/m²)"
+          }
+        },
+        {
+          "key": "automation",
+          "type": "boolean",
+          "label": {
+            "en": "Automation on",
+            "fr": "Automatisme actif",
+            "de": "Automatik aktiv",
+            "es": "Automatización activa"
+          }
+        }
+      ]
+    },
+    {
+      "key": "pause_automation",
+      "label": {
+        "en": "Pause the automation",
+        "fr": "Mettre l'automatisme en pause",
+        "de": "Automatik pausieren",
+        "es": "Pausar la automatización"
+      },
+      "description": {
+        "en": "Stop recommending positions for a façade, or all of them, for a while.",
+        "fr": "Ne plus recommander de position pour une façade, ou toutes, pendant un moment.",
+        "de": "Eine Zeit lang keine Positionen für eine oder alle Fassaden empfehlen.",
+        "es": "Dejar de recomendar posiciones para una fachada, o todas, durante un tiempo."
+      },
+      "timeout_seconds": 10,
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "description": {
+            "en": "Empty: every façade.",
+            "fr": "Vide : toutes les façades.",
+            "de": "Leer: alle Fassaden.",
+            "es": "Vacío: todas las fachadas."
+          }
+        },
+        {
+          "key": "duration",
+          "type": "number",
+          "label": {
+            "en": "Duration (min)",
+            "fr": "Durée (min)",
+            "de": "Dauer (Min.)",
+            "es": "Duración (min)"
+          },
+          "description": {
+            "en": "0 = until resumed.",
+            "fr": "0 = jusqu'à la reprise.",
+            "de": "0 = bis zur Fortsetzung.",
+            "es": "0 = hasta reanudar."
+          },
+          "required": false,
+          "default": 120,
+          "min": 0,
+          "max": 10080
+        }
+      ],
+      "outputs": [
+        {
+          "key": "paused_count",
+          "type": "number",
+          "label": {
+            "en": "Façades paused",
+            "fr": "Façades en pause",
+            "de": "Pausierte Fassaden",
+            "es": "Fachadas en pausa"
+          }
+        },
+        {
+          "key": "resume_at",
+          "type": "string",
+          "label": {
+            "en": "Resumes at",
+            "fr": "Reprise à",
+            "de": "Fortsetzung um",
+            "es": "Se reanuda a las"
+          }
+        }
+      ]
+    },
+    {
+      "key": "resume_automation",
+      "label": {
+        "en": "Resume the automation",
+        "fr": "Reprendre l'automatisme",
+        "de": "Automatik fortsetzen",
+        "es": "Reanudar la automatización"
+      },
+      "description": {
+        "en": "Recommend positions again; for one façade, returns the current recommendation.",
+        "fr": "Recommander à nouveau des positions ; pour une façade, renvoie la recommandation actuelle.",
+        "de": "Wieder Positionen empfehlen; für eine Fassade wird die aktuelle Empfehlung zurückgegeben.",
+        "es": "Volver a recomendar posiciones; para una fachada, devuelve la recomendación actual."
+      },
+      "timeout_seconds": 10,
+      "fields": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "description": {
+            "en": "Empty: every façade.",
+            "fr": "Vide : toutes les façades.",
+            "de": "Leer: alle Fassaden.",
+            "es": "Vacío: todas las fachadas."
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "key": "resumed_count",
+          "type": "number",
+          "label": {
+            "en": "Façades resumed",
+            "fr": "Façades reprises",
+            "de": "Fortgesetzte Fassaden",
+            "es": "Fachadas reanudadas"
+          }
+        },
+        {
+          "key": "position",
+          "type": "number",
+          "label": {
+            "en": "Recommended position (%)",
+            "fr": "Position recommandée (%)",
+            "de": "Empfohlene Position (%)",
+            "es": "Posición recomendada (%)"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "facade",
+      "label": {
+        "en": "Shutters of a façade",
+        "fr": "Volets d'une façade",
+        "de": "Rollläden einer Fassade",
+        "es": "Persianas de una fachada"
+      },
+      "description": {
+        "en": "Position, reason, sun power and the next 12 hours of a façade.",
+        "fr": "Position, raison, puissance solaire et 12 prochaines heures d'une façade.",
+        "de": "Position, Grund, Sonnenleistung und die nächsten 12 Stunden einer Fassade.",
+        "es": "Posición, motivo, potencia solar y próximas 12 horas de una fachada."
+      },
+      "icon": "sun",
+      "settings": [
+        {
+          "key": "facade",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Façade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          },
+          "required": true
+        }
+      ],
+      "action_timeout_seconds": 15
+    },
+    {
+      "key": "sun_weather",
+      "label": {
+        "en": "Sun and weather",
+        "fr": "Soleil et météo",
+        "de": "Sonne und Wetter",
+        "es": "Sol y tiempo"
+      },
+      "description": {
+        "en": "Sun height, clouds, temperature, gusts, UV and the irradiance outlook.",
+        "fr": "Hauteur du soleil, nuages, température, rafales, UV et prévision d'ensoleillement.",
+        "de": "Sonnenhöhe, Wolken, Temperatur, Böen, UV und Einstrahlungsprognose.",
+        "es": "Altura del sol, nubes, temperatura, ráfagas, UV y previsión de irradiancia."
+      },
+      "icon": "cloud"
+    },
+    {
+      "key": "overview",
+      "label": {
+        "en": "All shutters",
+        "fr": "Tous les volets",
+        "de": "Alle Rollläden",
+        "es": "Todas las persianas"
+      },
+      "description": {
+        "en": "Every façade at a glance, with pause and resume buttons.",
+        "fr": "Toutes les façades d'un coup d'œil, avec pause et reprise.",
+        "de": "Alle Fassaden auf einen Blick, mit Pause und Fortsetzen.",
+        "es": "Todas las fachadas de un vistazo, con pausa y reanudación."
+      },
+      "icon": "sliders",
+      "action_timeout_seconds": 15
+    }
+  ]
+}
